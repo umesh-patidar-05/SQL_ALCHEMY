@@ -1,19 +1,17 @@
-from database.connection import Database
+from db.db_config import engine, Base, sessionlocal
 from model.employee import Employee
+from sqlalchemy import select
+
+Base.metadata.create_all(engine)
+
 
 class EmployeeDao:
 
     def get_employee_by_id(self, id):
-        db = Database()
-        conn = db.connect()
-        cursor = conn.cursor()
-        query = "SELECT * FROM pdemployee WHERE id = %s"
-        cursor.execute(query, (id,))
-        row = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        if row is not None:
-            employee = Employee(row[0], row[1], row[2])
+        session = sessionlocal()
+        stmt = select(Employee).where(Employee.id ==id)
+        employee = session.scalars(stmt).first()
+        if employee is not None:
             return employee
         else:
             return None
@@ -22,59 +20,36 @@ class EmployeeDao:
 
     def get_all_employees(self):
         print("dao getting employee data")
-        db = Database()
-        conn = db.connect()
-        cursor = conn.cursor()
-        query = "SELECT * FROM pdemployee"
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        employees = []
-        for row in rows:
-            employee = Employee(row[0], row[1], row[2])
-            employees.append(employee)
-        
-        cursor.close()    
-        conn.close()
+        session = sessionlocal()
+        stmt = select(Employee)
+        employees = session.scalars(stmt).all()
         return employees
 
 
     def save_employee(self, employee):
         print("dao saving employee data")
-        print("ID", employee.id)
-        print("Name", employee.name)
-        print("salary", employee.salary)
-        db = Database()
-        conn = db.connect()
-        cursor = conn.cursor()
-        query = "insert into pdemployee(id, name, salary) values(%s, %s, %s)"
-        data = (employee.id, employee.name, employee.salary)
-        cursor.execute(query, data)
-        conn.commit()
-        conn.close()
-        print("data saved successful plz check table")
+        session = sessionlocal()
+        session.add(employee)
+        session.commit()
+        print('Employee will be inserted')
 
 
     def update_employee_salary_by_id(self, id, salary):
-        db = Database()
-        conn = db.connect()
-        cursor = conn.cursor()
-        query = "UPDATE pdemployee SET salary = %s WHERE id = %s"
-        cursor.execute(query, (salary, id))
-        conn.commit()
-        if cursor.rowcount != 0:
-            print("Employee salary update successfully")
+        session = sessionlocal()
+        stmt = select(Employee).where(Employee.id ==id)
+        employee = session.scalars(stmt).first()
+        employee.salary = salary
+        session.commit()
+        print("Employee salary update successfully")
 
-        else:
-            print("no employee found") 
 
     def delete_employee_id(self, id):
-        db = Database()
-        conn = db.connect()
-        cursor = conn.cursor()
-        query = "DELETE FROM pdemployee WHERE id = %s"
-        cursor.execute(query, (id,))
-        conn.commit()
-        if cursor.rowcount !=0:
-            print("Employee delete successfully")
+        session = sessionlocal()
+        stmt = select(Employee).where(Employee.id == id)
+        employee = session.scalars(stmt).first()
+        if employee is not None:
+            session.delete(employee)
+            session.commit()
+            print("Employee delete sccessfully")
         else:
-            print("NO Employee existes with this id")    
+            print("No employee available with this id")    

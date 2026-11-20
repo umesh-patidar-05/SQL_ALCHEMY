@@ -2,6 +2,7 @@
 from db.db_config import engine, Base
 from model.employee import Employee
 from db.db_config import sessionlocal
+from service.employee_service import EmployeeService
 
 Base.metadata.create_all(engine)
 print("table will be created agar sab kuch sahi raha")
@@ -30,18 +31,19 @@ while True:
             
                 print("ID: ", employee.id)
                 print("Name: ", employee.name)
+                print("Email", employee.email)
                 print("Salary: ", employee.salary)            
 
         case 2:
             service = EmployeeService()                    
-            id = int(input("Enter id: "))
             name = input("Enter name: ")
+            email = input("Enter email: ")
             salary = float(input("Enter salary: "))
-            employee = Employee(id, name, salary)
+            employee = Employee(name = name, email = email, salary= salary)
             service.add_employee(employee)            
 
         case 3:
-
+            service = EmployeeService()
             id = int(input("Enter employee id"))
             employee = service.search_employee_by_id(id)
             
@@ -51,6 +53,7 @@ while True:
             else:
                 print("ID", employee.id)
                 print("Name", employee.name)
+                print("Email", employee.email)
                 print("Salary", employee.salary)   
 
         case 4:

@@ -6,5 +6,5 @@ engine = create_engine(url, echo = False)
 print("Engine created successfully")
 sessionlocal = sessionmaker(bind = engine)
 print("session factor created")
-class Base(DeclarativeBase):
+class Base(DeclarativeBase): 
     pass
